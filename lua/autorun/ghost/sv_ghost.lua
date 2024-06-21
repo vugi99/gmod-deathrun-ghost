@@ -2,6 +2,8 @@ if SERVER then
     local TEAM_GHOST = 5
     local GHOST_COMMAND = "ghost"
 
+    util.AddNetworkString( "GhostShowPlayers" )
+
     game.ConsoleCommand("mp_show_voice_icons 0")
 
     hook.Add("PlayerSay", "PlayerRequestGhostCheck", function(ply, text)
@@ -13,7 +15,7 @@ if SERVER then
             elseif ply:IsGhost() then
                 SetGhost(ply, false)
             else
-                ply:ChatPrint("Você não pode fazer isso agora.")
+                ply:ChatPrint("You cannot do it anymore.")
 
                 return
             end
@@ -21,14 +23,18 @@ if SERVER then
     end)
 
     function SetGhost(ply, stat)
-        ply:SetNWBool("IsGhost", stat)
-        ply:DrawShadow(not stat)
-        ply:SetAvoidPlayers(stat)
+        if (stat ~= ply:IsGhost()) then
+            ply:SetNWBool("IsGhost", stat)
+            ply:DrawShadow(not stat)
+            ply:SetAvoidPlayers(stat)
 
-        if stat then
-            AddGhost(ply)
-        else
-            RemoveGhost(ply)
+            if stat then
+                AddGhost(ply)
+            else
+                RemoveGhost(ply)
+            end
+            net.Start( "GhostShowPlayers" )
+            net.Send( ply )
         end
     end
 

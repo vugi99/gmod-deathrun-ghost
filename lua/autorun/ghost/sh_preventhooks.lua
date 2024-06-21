@@ -4,27 +4,39 @@
 if SERVER then
 
 	hook.Add("PlayerSpray", "DisableGhostSpray", function( ply )
-		return ply:IsGhost()
+		if ply:IsGhost() then
+			return true
+		end
 	end )
 
 	hook.Add("PlayerCanPickupWeapon", "DisableGhostPickupWeapons", function( ply, ent )
-		return not ply:IsGhost()
+		if (ply:IsGhost()) then
+			return false
+		end
 	end)
 
 	hook.Add("AcceptInput", "FixGhostTeleport", function( ent, input, activator, caller, value )
-		return activator:IsPlayer() and activator:IsGhost()
+		if (activator:IsPlayer() and activator:IsGhost()) then
+			return true
+		end
 	end)
 
 	hook.Add("PlayerUse", "DisableGhostPicking", function( ply )
-		return not ply:IsGhost()
+		if (ply:IsGhost()) then
+			return false
+		end
 	end)
 
 	hook.Add("PlayerSwitchFlashlight", "PlayerSwitchFlashlight", function( ply, turningOn )
-		return not ply:IsGhost()
+		if (ply:IsGhost()) then
+			return false
+		end
 	end)
 
 	hook.Add("PlayerShouldTakeDamage", "RemoveGhostDamage", function( target, dmg )
-		return target:IsPlayer() and not target:IsGhost()
+		if (target:IsPlayer() and target:IsGhost()) then
+			return false
+		end
 	end)
 
 	hook.Add("GetFallDamage", "RemoveFallDamageSound", function( ply, speed )
@@ -38,14 +50,43 @@ end
 if CLIENT then
 
 	hook.Add("PrePlayerDraw", "DrawGhosts", function( ply )
-		return ply:IsGhost() and not LocalPlayer():IsGhost()
+		if (ply:IsGhost() and not LocalPlayer():IsGhost()) then
+			for k, vpart in pairs( ply.pac_outfits or {} ) do
+				vpart:SetHide(true)
+			end
+			ply:DrawShadow(false)
+
+			if IsValid(ply.cl_PS2_trailEnt) then
+				ply.cl_PS2_trailEnt:SetNoDraw(true)
+			end
+			return true
+		end
 	end)
+
+	net.Receive( "GhostShowPlayers", function( len, sply )
+		--print("GhostShowPlayers")
+
+		for i, ply in ipairs(player.GetAll()) do
+			if (ply ~= LocalPlayer()) then
+				for k, vpart in pairs( ply.pac_outfits or {} ) do
+					vpart:SetHide(false)
+				end
+				ply:DrawShadow(true)
+
+				if IsValid(ply.cl_PS2_trailEnt) then
+					ply.cl_PS2_trailEnt:SetNoDraw(false)
+				end
+			end
+		end
+	end )
 end
 
 -- shared hooks
 
 hook.Add("PlayerFootstep", "RemoveGhostFootstep", function( ply )
-	return ply:IsGhost()
+	if ply:IsGhost() then
+		return true
+	end
 end)
 
 hook.Add("OnEntityCreated", "SetCustomCollisionToAllPlayers", function( ent )

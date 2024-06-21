@@ -10,7 +10,7 @@ hook.Add("KeyPress", "HandlePositionRequest", function(ply, key)
 	if IsFirstTimePredicted() then
 		if key == IN_ATTACK and ply:IsGhost() then
 			if CLIENT then
-				table.insert(notifications, { text = "Salvo", frame = 3 })
+				table.insert(notifications, { text = "Saved", frame = 3 })
 			else
 				ply:SetNWVector("Ghost_Spawnpoint_Position",ply:GetPos())
 				ply:SetNWAngle("Ghost_Spawnpoint_Angle",ply:EyeAngles())
@@ -23,7 +23,7 @@ hook.Add("KeyPress", "HandlePositionRequest", function(ply, key)
 
 				if angle ~= Vector(0, 0, 0) then
 					if CLIENT then
-						table.insert(notifications, { text = "Respawnado", frame = 3 })
+						table.insert(notifications, { text = "Respawn", frame = 3 })
 					else
 						ply:SetPos(position)
 						ply:SetEyeAngles(angle)
